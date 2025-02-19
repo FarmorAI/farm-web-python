@@ -1,0 +1,13 @@
+train: /Users/songbeom/final-project/farm-web-python/src/models/dataset/train/images
+val: /Users/songbeom/final-project/farm-web-python/src/models/dataset/valid/images
+test: /Users/songbeom/final-project/farm-web-python/src/models/dataset/test/images
+
+nc: 2
+names: ["immature_strawberry", "ripe_strawberry"]
+
+roboflow:
+  workspace: strawberryquality
+  project: my-first-project-n5oea
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/strawberryquality/my-first-project-n5oea/dataset/1
