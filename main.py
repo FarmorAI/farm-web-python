@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from src.api.routes import router
 import uvicorn
 
 app = FastAPI()
+app.include_router(router, prefix="/api/v1")
 
 class AIRequest(BaseModel) :
     data : list # spring 에서 받은 예제 데이터
