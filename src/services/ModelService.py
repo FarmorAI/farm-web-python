@@ -1,11 +1,11 @@
 import numpy as np
-from src.models.AppleModel import AppleModel
-from services.ImagePreprocessor import ImagePreprocessor
+from src.models.AppleModel import appleModel
+from src.services.ImagePreprocessor import imagePreprocessor
 
 class ModelService:
    def __init__(self):
-      self.model = AppleModel
-      self.prepro = ImagePreprocessor()
+      self.model = appleModel
+      self.prepro = imagePreprocessor
 
    def analyze(self, image: np.ndarray) -> dict:
       try:

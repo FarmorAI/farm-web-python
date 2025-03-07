@@ -6,4 +6,4 @@ pip install -r requirements.txt
 
 # fastapi 서버 실행
 uvicorn main:app --reload --host 127.0.0.1 --port 9090
-
+python main.py
