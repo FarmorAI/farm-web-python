@@ -4,5 +4,6 @@ pip freeze > requirements.txt
 # 버전 설치
 pip install -r requirements.txt
 
-# fastapi 서버 재가동
-uvicorn main:app --reload
+# fastapi 서버 실행
+uvicorn main:app --reload --host 127.0.0.1 --port 9090
+python main.py
