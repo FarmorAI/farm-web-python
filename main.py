@@ -48,4 +48,4 @@ async def analyze_api(file: UploadFile = File(...)):
 
 # uvicorn 실행 환경 설정
 if __name__ == "__main__":
-    uvicorn.run("main:app", host= "127.0.0.1", port=9090, reload=True)
+    uvicorn.run("main:app", host= "0.0.0.0", port=9090, reload=True)
