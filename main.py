@@ -1,18 +1,14 @@
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from pydantic import BaseModel
-
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
+import base64
+import os
 import cv2
 import numpy as np
 from src.services.ModelService import modelService  # 싱글톤 인스턴스를 import
 
 app = FastAPI()
-
-class AIRequest(BaseModel) :
-    data : list # spring 에서 받은 예제 데이터
-
-class AIResponse(BaseModel) :
-    result : str # 예측 결과
 
 @app.get("/")
 async def root():
