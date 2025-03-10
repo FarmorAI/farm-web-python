@@ -1,10 +1,12 @@
-import os
 import numpy as np
+import cv2
 from PIL import Image
-from datetime import datetime
+from io import BytesIO
+from fastapi import UploadFile
+from starlette.datastructures import Headers
 from src.models.AppleModel import appleModel
-from src.services.ImagePreprocessor import imagePreprocessor
-from src.services.YoloPreprocessor import yoloPreprocessor
+from src.preprocessor.ImagePreprocessor import imagePreprocessor
+from src.preprocessor.YoloPreprocessor import yoloPreprocessor
 
 class ModelService:
    def __init__(self):
@@ -12,45 +14,37 @@ class ModelService:
       self.imagePrepro = imagePreprocessor
       self.yoloPrepro = yoloPreprocessor
 
-   def analyze(self, image: np.ndarray) -> dict:
+   # 이미지 분석 및 결과 반환
+   async def analyze(self, image: np.ndarray) -> tuple:
       try:
          yolo_image, yolo_results = self.yoloPrepro.yolo_detect(image) # YOLO로 이미지 분석
          processed_image = self.imagePrepro.preprocess(yolo_image[0])  # 이미지 전처리
          result = self.model.predict(processed_image)                  # 예측 수행
-
-         # YOLO 이미지 저장
-         image_path = self.save_image(yolo_results[0].plot())
-         result["image_path"] = image_path
-         
-         return result
+         processed_image = self.convert_to_upload_file(yolo_results[0].plot())
+         return processed_image, result
       
       except Exception as e:
          return {
             "success":False,
             "error": str(e)
          }
-   
-   def save_image(self, image: np.ndarray, save_directory: str = "images") -> str:
-      try:
-         # 디렉토리 생성 (존재하지 않으면)
-         if not os.path.exists(save_directory):
-            os.makedirs(save_directory)
 
-         # 이미지 이름 생성 (현재 시간 기준)
-         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-         image_name = f"image_{timestamp}.png"
-         image_path = os.path.join(save_directory, image_name)
-
-         # 이미지를 저장
-         img = Image.fromarray(image)
-         img.save(image_path)
-         return image_path
+   # UploadFile로 변환하는 함수
+   def convert_to_upload_file(self, image: np.ndarray, filename: str = "default.png") -> UploadFile:
+      image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # BGR 이미지를 RGB로 변환
+      image = Image.fromarray(image)    # numpy 배열을 PIL 이미지로 변환
+      image = image.resize((300, 300))  # 사이즈 조정
       
-      except Exception as e:
-         return {
-            "success": False,
-            "error": str(e)
-         }
+      # BytesIO 스트림 생성
+      image_stream = BytesIO()
+      file_type = filename.split('.')[-1].lower()
+      image.save(image_stream, format=file_type)  # PNG 형식으로 저장
+      image_stream.seek(0)  # 파일 포인터를 처음으로 이동
+
+      # UploadFile 객체 생성 및 반환
+      upload_file = UploadFile(filename=filename, file=image_stream)
+      upload_file._headers = Headers({"content-type": f"image/{file_type}"})
+      return upload_file
 
 # 싱글톤 인스턴스 생성
 modelService = ModelService()
