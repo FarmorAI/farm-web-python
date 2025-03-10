@@ -6,6 +6,8 @@ import cv2
 import numpy as np
 from src.services.ModelService import modelService  # 싱글톤 인스턴스를 import
 from src.services.S3Service import S3Service
+from src.repository.MySqlRepository import mysql_repository
+import scipy.stats as stats
 
 app = FastAPI()
 s3_service = S3Service()
@@ -40,6 +42,34 @@ async def analyze_api(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# 메인페이지 그래프
+@app.get("/fit_distribution")
+async def fit_distribution():
+    df = mysql_repository.get_data()
+    
+    response_data = []
+    for grade in [0, 1, 2]:
+        data = df[df["cate3"] == grade]["weight"]
+        mu, std = np.mean(data), np.std(data)
+        x = np.linspace(mu - 3*std, mu + 3*std, 100)
+        y = stats.norm.pdf(x, mu, std)
+        
+        # ✅ 무게(weight) 기준 상위 25% 값 계산
+        threshold_75 = np.percentile(data, 75)
+        mean_value = mu  # ✅ 평균값 추가
+
+        response_data.append({
+            "grade": grade,
+            "mu": mu,
+            "std": std,
+            "mean": mean_value,  # ✅ 평균값 추가
+            "x": x.tolist(),
+            "y": y.tolist(),
+            "threshold_75": threshold_75  # ✅ 무게 기준 상위 25% 값 추가
+        })
+    
+    return {"distribution": response_data}
 
 # uvicorn 실행 환경 설정
 if __name__ == "__main__":
