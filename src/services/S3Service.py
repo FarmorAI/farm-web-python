@@ -45,3 +45,6 @@ class S3Service:
          )
       except Exception as e:
          raise HTTPException(status_code=500, detail=str(e))
+
+
+s3_service = S3Service()

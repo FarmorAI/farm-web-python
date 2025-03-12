@@ -2,8 +2,10 @@ from fastapi import HTTPException
 import pandas as pd
 import mysql.connector
 import os
+
 from dotenv import load_dotenv
 load_dotenv()
+
 class MySqlRepository:
     def __init__(self):
         self.pool = mysql.connector.pooling.MySQLConnectionPool(
@@ -35,5 +37,6 @@ class MySqlRepository:
                 status_code=500,
                 detail=f"Database error: {str(e)}"
             )
+        
 # 싱글톤
 mysql_repository = MySqlRepository()
