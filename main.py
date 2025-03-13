@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
-from src.api.analyze_routes import router as analyze_router
-from src.api.distribution_routes import router as distribution_router
+from src.routes.analyze_routes import router as analyze_router
+from src.routes.distribution_routes import router as distribution_router
 
 app = FastAPI()
 app.include_router(analyze_router)
