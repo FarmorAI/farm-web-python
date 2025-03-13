@@ -29,7 +29,7 @@ async def analyze(file: UploadFile = File(...)):
       return JSONResponse(content={
             "message": "success",
             "image_url": s3_result["file_url"],
-            "quality_metrics": quality_metrics
+            "quality": quality_metrics["quality"]
       })
    except Exception as e:
       raise HTTPException(status_code=500, detail=str(e))
@@ -40,12 +40,9 @@ async def analyze(file: UploadFile = File(...)):
 # {
 #     "message": "success",
 #     "image_url": "https://farmorai-bucket00.s3.ap-northeast-2.amazonaws.com/images/324f9fb1-9a56-4304-baad-c40d443db886.png",
-#     "quality_metrics": {
-#         "success": true,
-#         "quality": {
+#     "quality": {
 #         "특": 0.36,
 #         "상": 0,
 #         "보통": 0.64
-#         }
 #     }
 # }
