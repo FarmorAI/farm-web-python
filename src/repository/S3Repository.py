@@ -44,4 +44,3 @@ class S3Repository:
          if e.response['Error']['Code'] == 'NoSuchKey':
             raise HTTPException(status_code=404, detail="이미지가 없음")
          raise HTTPException(status_code=500, detail=str(e))
-
