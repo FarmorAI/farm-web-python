@@ -165,3 +165,8 @@ cython_debug/
 apple_data/
 
 *.npy
+
+Dockerfile
+.dockerignore
+Dockerfile
+.dockerignore

@@ -36,3 +36,7 @@ conda init zsh
 
 # 터미널 다시 시작 
 exec zsh
+
+# 욜로 설치
+pip install ultralytics
+from ultralytics import YOLO 사용
