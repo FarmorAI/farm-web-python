@@ -1,0 +1,6 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 5
+names: ['100-_ripeness', '20-_ripeness', '50-_ripeness', '75-_ripeness', 'rotten_apple']
