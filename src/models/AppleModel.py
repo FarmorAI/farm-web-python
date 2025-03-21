@@ -26,5 +26,5 @@ class AppleModel:
             "success": False,
             "error": str(e)
          }
-      
+
 appleModel = AppleModel()
