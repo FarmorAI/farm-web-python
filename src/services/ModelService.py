@@ -18,17 +18,12 @@ class ModelService:
    async def analyze(self, image: np.ndarray) -> tuple:
       try:
          yolo_image, yolo_results, count = self.yoloPrepro.yolo_detect(image) # YOLO로 이미지 분석
-         if count == 0:
-            return {
-                "success": False,
-                "error": "No apples detected."
-            }
          analysis_result = self.yoloPrepro.analyze_apples(image)  # 사과 분석 결과
          apple_info = analysis_result["apples"] # 사과 전체 정보 리스트
-            
          processed_image = self.imagePrepro.preprocess(yolo_image[0])  # 이미지 전처리
          result = self.model.predict(processed_image)                  # 예측 수행
          processed_image = self.convert_to_upload_file(yolo_results[0].plot())
+         
          return processed_image, result, count, apple_info
       
       except Exception as e:

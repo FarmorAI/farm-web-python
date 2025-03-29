@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post("/analyze")  # return : JSONResponse
 async def analyze(file: UploadFile = File(...)):
+   print(file)
    
    # 이미지 형식 검증
    if not file.content_type.startswith("image/"):
@@ -21,10 +22,17 @@ async def analyze(file: UploadFile = File(...)):
       image = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
 
       # 모델 예측 분석
-      processed_image, quality_metrics, apple_count, apples_info = await modelService.analyze(image)
+      # processed_image, quality_metrics, apple_count, apples_info = await modelService.analyze(image)
+      result = await modelService.analyze(image)
+      processed_image, quality_metrics, apple_count, apples_info = result
+      print("processed_image", processed_image)
+      print("quality_metrics", quality_metrics)
+      print("apple_count", apple_count)
+      print("apples_info", apples_info)
       
       # S3에 파일 업로드
       s3_result = await s3_service.upload_image(processed_image)
+      print(apples_info)
 
       return JSONResponse(content={
             "message": "success",
@@ -34,6 +42,8 @@ async def analyze(file: UploadFile = File(...)):
             "apples" : apples_info
       })
    except Exception as e:
+      import traceback
+      traceback.print_exc()
       raise HTTPException(status_code=500, detail=str(e))
    
 

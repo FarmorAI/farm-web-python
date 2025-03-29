@@ -7,31 +7,26 @@ class YoloPreprocessor:
     def __init__(self):
         self.model = YOLO('yolov8m.pt')
 
-    # YOLO 모델로 객체 인식 수행
     def yolo_detect(self, img, target_class_id=47):
-        # 이미지가 PIL 이미지인 경우 numpy 배열로 변환
         img_np = np.array(img) if isinstance(img, Image.Image) else img
         results = self.model.predict(img_np)
 
         extracted_obj = []
-        # 결과에서 바운딩 박스 정보 가져오기
         for result in results:
-            # 바운딩 박스 정보가 사과(47)인 경우에만 박스 추출
             for box, cls in zip(result.boxes, result.boxes.cls):
                 if int(cls) == target_class_id:
-                    # 이미지에서 객체 영역 자르기
-                    x1, y1, x2, y2 = map(int, box.xyxy[0])  # xyxy 형식의 좌표
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
                     cropped_obj = img_np[y1:y2, x1:x2]
+                    if cropped_obj.size == 0:
+                        continue
                     extracted_obj.append(cropped_obj)
-        
-        count = len(extracted_obj)
 
+        count = len(extracted_obj)
         return extracted_obj, results, count
-    
-      # 색상 비율 분석
+
     def analyze_color_ratio(self, cropped_img):
-        bgr = cv2.cvtColor(cropped_img, cv2.COLOR_RGB2BGR)
-        hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+        # FastAPI는 BGR로 들어오기 때문에 RGB2BGR 변환은 생략
+        hsv = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2HSV)
 
         red_lower1 = np.array([0, 70, 50])
         red_upper1 = np.array([10, 255, 255])
@@ -49,7 +44,7 @@ class YoloPreprocessor:
         green_mask = cv2.inRange(hsv, green_lower, green_upper)
         brown_mask = cv2.inRange(hsv, brown_lower, brown_upper)
 
-        total_pixels = hsv.shape[0] * hsv.shape[1]
+        total_pixels = hsv.shape[0] * hsv.shape[1] or 1  # 0 나눗셈 방지
         red_ratio = round((cv2.countNonZero(red_mask) / total_pixels) * 100, 1)
         green_ratio = round((cv2.countNonZero(green_mask) / total_pixels) * 100, 1)
         brown_ratio = round((cv2.countNonZero(brown_mask) / total_pixels) * 100, 1)
@@ -60,11 +55,9 @@ class YoloPreprocessor:
             "brown": brown_ratio
         }
 
-    # 숙성도 추정 (빨강 비율 기반)
     def estimate_ripeness(self, color_ratio):
         return round(color_ratio["red"] / 100, 2)
 
-    # 숙성도 기반 품질 등급 분류
     def classify_grade(self, ripeness):
         if ripeness >= 0.85:
             return "특"
@@ -73,12 +66,11 @@ class YoloPreprocessor:
         else:
             return "보통"
 
-    # 전체 분석 파이프라인
     def analyze_apples(self, img):
-        cropped_objs, _, results, count = self.yolo_detect(img)
+        cropped_objs, results, count = self.yolo_detect(img)
         apples = []
 
-        for crop in cropped_objs :
+        for crop in cropped_objs:
             color_ratio = self.analyze_color_ratio(crop)
             ripeness = self.estimate_ripeness(color_ratio)
             grade = self.classify_grade(ripeness)
