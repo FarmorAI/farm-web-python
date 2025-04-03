@@ -1,0 +1,14 @@
+analysis/
+images/
+__pycache__/
+.conda/
+.git
+.gitignore
+
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
